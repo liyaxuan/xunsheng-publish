@@ -1,38 +1,35 @@
 /* 所有全局范围内的变量和函数都有姓名前缀 */
 
-var lyxApiUrl={
-	"auth": "http://api.xunsheng90.com/user/login",
-	"sign": "http://sign.xunsheng90.com/oss-sign",
-	"file": "http://temp.xunsheng90.com",
-	"entity": "http://api.xunsheng90.com/entity/uwork",
+var lyxApiUrl = {
+	auth: "http://api.xunsheng90.com/user/login",
+	sign: "http://sign.xunsheng90.com/oss-sign",
+	file: "http://temp.xunsheng90.com",
+	entity: "http://api.xunsheng90.com/entity/uwork",
 };
 
-/* 测试代码, 用来登录获取token */
-// var data=lyxLogin({
-// 	"uid": "admin001",
-// 	"pwd": "kkmnb"
-// });
-
 /*
-	lyxInit接受两个参数, 用于初始化整个发布面板
-	data和uidToken
-	data={
+	lyxInit接受参数config用于初始化整个发布面板
+	config = {
+		offset: simditor的offset
 		method: 新建则值为"post", 编辑则值为为"put",
 		id: 编辑的这篇作品的id, 如果是新建则没有该属性,
 		succ: 提交成功触发的回调函数,
 		fail: 提交失败触发的回调函数,
+		uid: "......",
+		token: "......"
 	}
-	uidToken={ uid: "......", token: "......" }
 */
+
 // lyxInit({
-// 	"method": "post",
+// 	offset: 0,
+// 	"method": "put",
+// 	"id": "5728c9c1d6c15500135cb543",
 // 	succ: function () {
 // 		alert("上传好了");
 // 	},
-// 	fail: function () {}
-// 	}, {
+// 	fail: function () {},
 // 	"uid": "admin001",
-// 	"token": data.token
+// 	"token": lyxLogin({ uid: "admin001", pwd: "kkmnb" }).token
 // });
 
 function lyxLogin(uidPwd) {
@@ -75,13 +72,45 @@ function lyxAjax(o) {
 		return eval("("+xhr.responseText+")");
 }
 
-function lyxInit(data, uidToken) {
+function lyxInit(config) {
+	var format = {
+		title: "",
+		thumbnail: "",
+		class_name: "",
+		author_uid: config.uid,
+		author_content: "",
+		main_content: "",
+		audio: "",
+		audio_name: "",
+		video: "",
+		video_name: "",
+		video_code: ""
+	};
+
+	var editor;
+
+	initSimditor('#lyx-simditor', function () {
+		if(config.method=="put")
+			getDetail();
+	});
+
+	var uploader = ["thumbnail", "audio", "video"].map(function (item) {
+		return initUploader(item);
+	});
+	var isUploading = false;
+	var choice = { "av": "audio", "fc": "file" };
+
+	setInterval(update, 240*1000);
+
 	function sign(isAsy, succCallback, failCallback) {
 		return lyxAjax({
 			isAsy: isAsy,
 			method: "get",
 			url: lyxApiUrl["sign"],
-			params: uidToken,
+			params: {
+				uid: config.uid,
+				token: config.token
+			},
 			succ: succCallback,
 			fail: failCallback
 		});
@@ -92,25 +121,30 @@ function lyxInit(data, uidToken) {
 			isAsy: true,
 			method: "put",
 			url: lyxApiUrl["auth"],
-			params: uidToken,
-			succ: function (data) {
-				uidToken.token=data.token;
+			params: {
+				uid: config.uid,
+				token: config.token
+			},
+			succ: function (response) {
+				config.token = response.token;
 			},
 			fail: function () {}
 		})
 	}
 
-	function initSimditor() {
-		sign(true, function () {
-			delete data["status"];
-			editor=new Simditor({
-				textarea: $("#lyx-simditor"),
+	function initSimditor(selector, then) {
+		sign(true, function (response) {
+			delete response["status"];
+
+			editor = new Simditor({
+				textarea: $(selector),
 				toolbar: ["title", "bold", "italic", "underline", "strikethrough","color", "|", "ol", "ul", "blockquote", "|", "link", "image", "hr", "|", "indent", "outdent", "alignment"],
 				toolbarFloat: true,
+				toolbarFloatOffset: config.offset,
 				defaultImage: "lib/simditor/images/image.png",
 				upload: {
 				    url: lyxApiUrl.file,
-				    params: data,
+				    params: response,
 				    fileKey: "file",
 				    connectionCount: 3,
 				    leaveConfirm: "正在上传文件"
@@ -124,10 +158,12 @@ function lyxInit(data, uidToken) {
 					alert("请使用图片上传功能, 而不要粘贴图片");
 					return false;
 				}
-			});	
+			});
+
+			then();
 		}, function (errorObject) {
-			var data=errorObject.data;
-			if(!data&&data!=0&&typeof data!="undefined")
+			var data = errorObject.data;
+			if(!data && data != 0 && typeof data!="undefined")
 				alert("发生了不知道是什么的错误");
 			else
 				alert("发生了没有处理的错误\n错误代码: "+data.error_code+"\n错误信息: "+data.error_info+"\n错误描述: "+data.msg);
@@ -189,12 +225,13 @@ function lyxInit(data, uidToken) {
 					this.attachment.hide();
 				},
 				UploadProgress: function(uploader, file) {
-					isUploadering=true;				
+					isUploading = true;			
 					this.process.show();
 					this.bar.css("width", file.percent+"%");
 					this.percentage.html(file.percent+"%");
 				},
 				FileUploaded: function(uploader, file, info) {
+					isUploading = false;
 					var data=eval("("+info.response+")");
 					this.process.hide();
 
@@ -223,26 +260,29 @@ function lyxInit(data, uidToken) {
 		lyxAjax({
 			isAsy: true,
 			method: "get",
-			url: lyxApiUrl["entity"]+"/"+data.id,
-			params: uidToken,
+			url: lyxApiUrl["entity"] + "/" + config.id,
+			params: {
+				uid: config.uid,
+				token: config.token
+			},
 			succ: function (data) {
-				data=data.entity;
-				$("#uwork-title").val(data.title);
+				data = data.entity;
+				$("#lyx-title").val(data.title);
 				$("#lyx-thumbnail-attachment").show().find(".img").css("background-image", "url("+data.thumbnail+")");	
 
 				if(data.media.media_type=="audio") {
 					$("#lyx-audio-attachment").attr("src", data.media.url);
 					$("#lyx-audio-attachment").css("display", "block");
-					$("#uwork-audio-name").val(data.media.name);				
+					$("#lyx-audio-name").val(data.media.name);				
 				}
 				else {
 					$("#lyx-video-attachment").attr("src", data.media.url);
 					$("#lyx-video-attachment").css("display", "block");
-					$("#uwork-video-name").val(data.media.name);
-					$("#uwork-video-code").val(data.media.code);					
+					$("#lyx-video-name").val(data.media.name);
+					$("#lyx-video-code").val(data.media.code);					
 				}
 
-				$("#uwork-main-content").html(data.main_content);		
+				editor.setValue(data.main_content);		
 			},
 			fail: function () {}
 		});
@@ -252,9 +292,9 @@ function lyxInit(data, uidToken) {
 		var result=true;
 		$(".simditor-body").each(function () {
 			$(this).find("img").each(function () {
-				if($(this).attr("src").indexOf("http://")!=0) {
+				if($(this).attr("src").indexOf("http://") != 0) {
 					alert("文本编辑器中有图片还在上传\n请等待片刻再点\"提交\"");
-					result=false;
+					result = false;
 				}
 			});
 		});
@@ -262,14 +302,14 @@ function lyxInit(data, uidToken) {
 	}
 
 	function check() {
-		format["title"]=$("#uwork-title").val();
+		format["title"]=$("#lyx-title").val();
 		format["main_content"]=editor.getValue();
-		format["audio_name"]=$("#uwork-audio-name").val();
-		format["video_name"]=$("#uwork-video-name").val();
-		format["video_code"]=$("#uwork-video-code").val();
+		format["audio_name"]=$("#lyx-audio-name").val();
+		format["video_name"]=$("#lyx-video-name").val();
+		format["video_code"]=$("#lyx-video-code").val();
 
 		$(".tip").hide();
-		var result=true;
+		var result = true;
 
 		if(format["title"]=="") {
 			$(".title-tip").show();
@@ -303,7 +343,7 @@ function lyxInit(data, uidToken) {
 			}
 
 			if(choice.fc=="file") {
-				if(format["video"]==""&&data.method=="post") {
+				if(format["video"]==""&&config.method=="post") {
 					$(".video-file-tip").show();
 					result=false;
 				}				
@@ -322,63 +362,20 @@ function lyxInit(data, uidToken) {
 	function publish() {
 		lyxAjax({
 			isAsy: true,
-			method: data.method,
-			url: (data.method=="post"?lyxApiUrl["entity"]:(lyxApiUrl["entity"]+"/"+data.id)),
-			params: uidToken,
-			succ: data.succ,
-			fail: data.fail,
+			method: config.method,
+			url: (config.method == "post" ? lyxApiUrl["entity"] : (lyxApiUrl["entity"] + "/" + config.id)),
+			params: {
+				uid: config.uid,
+				token: config.token
+			},
+			succ: function (response) {
+				$(".lyx-layer").hide();
+				config.succ(response);
+			},
+			fail: config.fail,
 			formJson: format
 		});
 	}
-
-	var format={
-		"title": "",
-		"thumbnail": "",
-		"class_name": "",
-		"author_uid": uidToken["uid"],
-		"author_content": "",
-		"main_content": "",
-		"audio": "",
-		"audio_name": "",
-		"video": "",
-		"video_name": "",
-		"video_code": ""
-	};
-
-	setInterval(function () {
-		update();
-	}, 240*1000);
-
-	if(data.method=="put")
-		getDetail();
-
-	var editor;
-	initSimditor();
-	var uploader=[];
-	var type=["thumbnail", "audio", "video"];
-	for(var i=0;i<type.length;i++)
-		uploader[i]=initUploader(type[i]);
-	var isUploadering=false;
-
-	var choice={ "av": "audio", "fc": "file" };
-
-	$(".lyx-cancel").bind("click", function () {
-		var n=$(".lyx-cancel").index($(this));
-		$(".process").index(n).hide();
-		isUploadering=false;
-		switch (n) {
-			case 0:
-				format["thumbnail"]="";
-				break;
-			case 1:
-				format["audio"]="";
-				break;
-			case 2:
-				format["video"]="";
-				break;
-		}
-		uploader[n].stop();
-	});
 
 	$(".selection").bind("click", function () {
 		$(".selection").removeClass("selected");
@@ -409,7 +406,6 @@ function lyxInit(data, uidToken) {
 	});
 
 	$(".sub-selection").bind("click", function () {
-
 		$(".sub-selection").removeClass("selected");
 		$(this).addClass("selected");
 
@@ -429,11 +425,17 @@ function lyxInit(data, uidToken) {
 	});
 
 	$("#lyx-publish").bind("click", function () {
-		if(imgCheck()) {
-			if(!check()&&data.method=="post")
-				alert("请将表单填写完整");
-			else
-				publish();
+		if(isUploading) {
+			alert('有文件正在上传中, 请稍后');
+			return;
+		}
+		if(!imgCheck())
+			return;
+		if(!check() && config.method == "post")
+			alert("请将表单填写完整");
+		else {
+			$(".lyx-layer").show();
+			publish();
 		}
 	});
 }
