@@ -20,17 +20,17 @@ var lyxApiUrl = {
 	}
 */
 
-// lyxInit({
-// 	offset: 0,
-// 	"method": "put",
-// 	"id": "5728c9c1d6c15500135cb543",
-// 	succ: function () {
-// 		alert("上传好了");
-// 	},
-// 	fail: function () {},
-// 	"uid": "admin001",
-// 	"token": lyxLogin({ uid: "admin001", pwd: "kkmnb" }).token
-// });
+lyxInit({
+	offset: 0,
+	"method": "post",
+	// "id": "5728c9c1d6c15500135cb543",
+	succ: function () {
+		alert("上传好了");
+	},
+	fail: function () {},
+	"uid": "admin001",
+	"token": lyxLogin({ uid: "admin001", pwd: "kkmnb" }).token
+});
 
 function lyxLogin(uidPwd) {
 	return lyxAjax({
@@ -102,6 +102,13 @@ function lyxInit(config) {
 
 	setInterval(update, 240*1000);
 
+	function errHanlder(err, tip) {
+		if(!err && err != 0 && typeof err != "undefined")
+			alert("发生了不知道是什么的错误");
+		else
+			alert(tip + "\n发生了没有处理的错误\n错误代码: " + err.error_code + "\n错误信息: " + err.error_info + "\n错误描述: " + err.msg);		
+	}
+
 	function sign(isAsy, succCallback, failCallback) {
 		return lyxAjax({
 			isAsy: isAsy,
@@ -128,7 +135,10 @@ function lyxInit(config) {
 			succ: function (response) {
 				config.token = response.token;
 			},
-			fail: function () {}
+			fail: function (errObj) {
+				var data = errObj.data;
+				errHanlder('更新会话失败', data);
+			}
 		})
 	}
 
@@ -161,12 +171,9 @@ function lyxInit(config) {
 			});
 
 			then();
-		}, function (errorObject) {
-			var data = errorObject.data;
-			if(!data && data != 0 && typeof data!="undefined")
-				alert("发生了不知道是什么的错误");
-			else
-				alert("发生了没有处理的错误\n错误代码: "+data.error_code+"\n错误信息: "+data.error_info+"\n错误描述: "+data.msg);
+		}, function (errObj) {
+			var data = errObj.data;
+			errHanlder('获取签名失败, 不能初始化文本编辑器', data);
 		});	
 	}
 
@@ -245,9 +252,9 @@ function lyxInit(config) {
 				},
 				Error: function (uploader, error) {
 					if(error.code=="-600")
-						alert("文件大小必须小于: "+maxSize);
+						alert("文件大小必须小于: " + maxSize);
 					else if(error.code=="-601")
-						alert("文件格式必须是: "+typeAllowed);
+						alert("文件格式必须是: " + typeAllowed);
 				}
 			}
 		});
@@ -284,7 +291,10 @@ function lyxInit(config) {
 
 				editor.setValue(data.main_content);		
 			},
-			fail: function () {}
+			fail: function (errObj) {
+				var data = errObj.data;
+				errHanlder('获取文章内容失败', data);
+			}
 		});
 	}
 
@@ -372,7 +382,10 @@ function lyxInit(config) {
 				$(".lyx-layer").hide();
 				config.succ(response);
 			},
-			fail: config.fail,
+			fail: function (response) {
+				$(".lyx-layer").hide();
+				config.fail(response);
+			},
 			formJson: format
 		});
 	}
