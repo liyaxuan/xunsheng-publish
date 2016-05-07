@@ -22,8 +22,8 @@ var lyxApiUrl = {
 
 lyxInit({
 	offset: 0,
-	"method": "post",
-	// "id": "5728c9c1d6c15500135cb543",
+	"method": "put",
+	"id": "57287477d6c15500105122a6",
 	succ: function () {
 		alert("上传好了");
 	},
@@ -44,32 +44,32 @@ function lyxLogin(uidPwd) {
 	});
 }
 
-function lyxAjax(o) {
-	var xhr=new XMLHttpRequest();
-	var i=0;
-	for(var x in o.params) {
-		o.url+=((i==0?"?":"&")+x+"="+o.params[x]);
+function lyxAjax(obj) {
+	var xhr = new XMLHttpRequest();
+	var i = 0;
+	for(var x in obj.params) {
+		obj.url += ((i==0 ? "?" : "&") + x + "=" + obj.params[x]);
 		i++;
 	}
-	xhr.open(o.method, o.url, o.isAsy);
+	xhr.open(obj.method, obj.url, obj.isAsy);
 
-	if(o.formJson!==undefined) {
-		var formData=new FormData();
-		for(var x in o.formJson)
-			formData.append(x, o.formJson[x]);
+	if(obj.formJson !== undefined) {
+		var formData = new FormData();
+		for(var x in obj.formJson)
+			formData.append(x, obj.formJson[x]);
 		xhr.send(formData);
 	}
 	else
 		xhr.send(null);
-	if(o.isAsy)
+	if(obj.isAsy)
 		xhr.onreadystatechange=function () {
-			if(xhr.readyState==4&&xhr.status==200)
-				o.succ(eval("("+xhr.responseText+")"));
-			else if(xhr.readyState==4&&xhr.status!=200)
-				o.fail(eval("("+xhr.responseText+")"));
+			if(xhr.readyState == 4 && xhr.status == 200)
+				obj.succ(JSON.parse(xhr.responseText));
+			else if(xhr.readyState == 4 && xhr.status != 200)
+				obj.fail(JSON.parse(xhr.responseText));
 		};
 	else
-		return eval("("+xhr.responseText+")");
+		return JSON.parse(xhr.responseText);
 }
 
 function lyxInit(config) {
@@ -90,8 +90,11 @@ function lyxInit(config) {
 	var editor;
 
 	initSimditor('#lyx-simditor', function () {
-		if(config.method=="put")
+		if(config.method == 'put') {
+			$('#lyx-audio').hide();
 			getDetail();
+		}
+			
 	});
 
 	var uploader = ["thumbnail", "audio", "video"].map(function (item) {
@@ -391,6 +394,11 @@ function lyxInit(config) {
 	}
 
 	$(".selection").bind("click", function () {
+		var curChoice = $(this).attr('id').split('-')[0];
+		if(config.method == 'put' && curChoice != choice.av) {
+			alert('根据比赛规定, 上传之后不能更改附件类型');
+			return;
+		}
 		$(".selection").removeClass("selected");
 		$(this).addClass("selected");
 
@@ -419,6 +427,7 @@ function lyxInit(config) {
 	});
 
 	$(".sub-selection").bind("click", function () {
+
 		$(".sub-selection").removeClass("selected");
 		$(this).addClass("selected");
 
