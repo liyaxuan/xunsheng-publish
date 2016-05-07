@@ -91,10 +91,9 @@ function lyxInit(config) {
 
 	initSimditor('#lyx-simditor', function () {
 		if(config.method == 'put') {
-			$('#lyx-audio').hide();
+			$('#lyx-attachment').hide().next().hide().next().hide();
 			getDetail();
-		}
-			
+		}		
 	});
 
 	var uploader = ["thumbnail", "audio", "video"].map(function (item) {
@@ -394,11 +393,6 @@ function lyxInit(config) {
 	}
 
 	$(".selection").bind("click", function () {
-		var curChoice = $(this).attr('id').split('-')[0];
-		if(config.method == 'put' && curChoice != choice.av) {
-			alert('根据比赛规定, 上传之后不能更改附件类型');
-			return;
-		}
 		$(".selection").removeClass("selected");
 		$(this).addClass("selected");
 
