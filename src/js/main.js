@@ -7,30 +7,7 @@ var lyxApiUrl = {
 	entity: "http://api.xunsheng90.com/entity/uwork",
 };
 
-/*
-	lyxInit接受参数config用于初始化整个发布面板
-	config = {
-		offset: simditor的offset
-		method: 新建则值为"post", 编辑则值为为"put",
-		id: 编辑的这篇作品的id, 如果是新建则没有该属性,
-		succ: 提交成功触发的回调函数,
-		fail: 提交失败触发的回调函数,
-		uid: "......",
-		token: "......"
-	}
-*/
 
-lyxInit({
-	offset: 0,
-	"method": "put",
-	"id": "57287477d6c15500105122a6",
-	succ: function () {
-		alert("上传好了");
-	},
-	fail: function () {},
-	"uid": "admin001",
-	"token": lyxLogin({ uid: "admin001", pwd: "kkmnb" }).token
-});
 
 function lyxLogin(uidPwd) {
 	return lyxAjax({
@@ -63,11 +40,17 @@ function lyxAjax(obj) {
 		xhr.send(null);
 	if(obj.isAsy)
 		xhr.onreadystatechange=function () {
-			if(xhr.readyState == 4 && xhr.status == 200)
-				obj.succ(JSON.parse(xhr.responseText));
-			else if(xhr.readyState == 4 && xhr.status != 200)
-				obj.fail(JSON.parse(xhr.responseText));
-		};
+			if(xhr.readyState == 4) {
+				if(xhr.status == 200)
+					obj.succ(JSON.parse(xhr.responseText));
+				else if(xhr.status >= 500) {
+					$(".lyx-layer").hide();
+					alert('服务器错误 ' + xhr.status + ', 请删除文件名中如 / = ：; , 等不合法字符');
+				}					
+				else
+					obj.fail(JSON.parse(xhr.responseText));
+			}
+		}
 	else
 		return JSON.parse(xhr.responseText);
 }
@@ -114,8 +97,8 @@ function lyxInit(config) {
 	function sign(isAsy, succCallback, failCallback) {
 		return lyxAjax({
 			isAsy: isAsy,
-			method: "get",
-			url: lyxApiUrl["sign"],
+			method: 'get',
+			url: lyxApiUrl.sign,
 			params: {
 				uid: config.uid,
 				token: config.token
@@ -128,8 +111,8 @@ function lyxInit(config) {
 	function update() {
 		return lyxAjax({
 			isAsy: true,
-			method: "put",
-			url: lyxApiUrl["auth"],
+			method: 'put',
+			url: lyxApiUrl.auth,
 			params: {
 				uid: config.uid,
 				token: config.token
@@ -277,7 +260,7 @@ function lyxInit(config) {
 			succ: function (data) {
 				data = data.entity;
 				$("#lyx-title").val(data.title);
-				$("#lyx-thumbnail-attachment").show().find(".img").css("background-image", "url("+data.thumbnail+")");	
+				$("#lyx-thumbnail-attachment").show().find(".img").css("background-image", "url(" + data.thumbnail + ")");	
 
 				if(data.media.media_type=="audio") {
 					$("#lyx-audio-attachment").attr("src", data.media.url);

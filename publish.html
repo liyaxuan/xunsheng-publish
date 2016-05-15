@@ -1,166 +1,145 @@
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<title>publish</title>
-        <link rel="stylesheet" href="lib/simditor/styles/simditor.css">
-        <link rel="stylesheet" href="src/css/publish.css">
-	</head>
-	<!-- lyx-body 和 lyx-size去掉 -->
-	<body>
-		<div class="lyx-scope">
-			<div class="item">
-				<div class="title">基本</div>
-			</div>
-			<div class="item">
-				<div class="fixed sub fl">
-					<div class="fl">作品标题</div>
-					<div class="tip title-tip fl">*</div>
+<div class="lyx-scope">
+	<div class="item">
+		<div class="title">基本</div>
+	</div>
+	<div class="item">
+		<div class="fixed sub fl">
+			<div class="fl">作品标题</div>
+			<div class="tip title-tip fl">*</div>
+			<div class="cf"></div>
+		</div>
+		<div class="auto">
+			<input id="lyx-title" type="text" class="input">
+		</div>					
+		<div class="cf"></div>		
+	</div>
+	<div class="item">
+		<div class="fixed sub fl">
+			<div class="fl">作品封面</div>
+			<div class="tip thumbnail-tip fl">*</div>
+			<div class="cf"></div>
+		</div>
+		<div class="auto">
+			<div id="lyx-thumbnail-container" class="container">
+				<div id="lyx-thumbnail-select" class="btn clickable">选择图片</div>				
+				<div class="process">
+					<div class="filename fl"></div>
+					<div class="percentage fr"></div>
+					<div class="bar fr"><div class="inner-bar"></div></div>
 					<div class="cf"></div>
 				</div>
-				<div class="auto">
-					<input id="lyx-title" type="text" class="input">
-				</div>					
-				<div class="cf"></div>		
+				<div id="lyx-thumbnail-attachment" class="attachment fl"><div class="img"></div></div>
+				<div class="cf"></div>
+			</div>						
+		</div>
+		<div class="cf"></div>
+	</div>
+	<div class="item" id="lyx-attachment">
+		<div class="fixed fl">附件</div>
+		<div class="auto">
+			<div class="selection-group fl">
+				<div id="audio-selector" class="selection selected clickable fl">音频</div>
+				<div id="video-selector" class="selection clickable fl">视频</div>
+				<div class="cf"></div>	
 			</div>
-			<div class="item">
-				<div class="fixed sub fl">
-					<div class="fl">作品封面</div>
-					<div class="tip thumbnail-tip fl">*</div>
-					<div class="cf"></div>
-				</div>
-				<div class="auto">
-					<div id="lyx-thumbnail-container" class="container">
-						<div id="lyx-thumbnail-select" class="btn clickable">选择图片</div>				
-						<div class="process">
-							<div class="filename fl"></div>
-							<div class="percentage fr"></div>
-							<div class="bar fr"><div class="inner-bar"></div></div>
-							<div class="cf"></div>
-						</div>
-						<div id="lyx-thumbnail-attachment" class="attachment fl"><div class="img"></div></div>
-						<div class="cf"></div>
-					</div>						
-				</div>
+			<div class="cf"></div>						
+		</div>
+		<div class="cf"></div>		
+	</div>			
+	<div class="av audio">
+		<div class="item">
+			<div class="fixed sub fl">
+				<div class="fl">音频名称</div>
+				<div class="tip audio-name-tip fl">*</div>
 				<div class="cf"></div>
 			</div>
-			<div class="item" id="lyx-attachment">
-				<div class="fixed fl">附件</div>
-				<div class="auto">
-					<div class="selection-group fl">
-						<div id="audio-selector" class="selection selected clickable fl">音频</div>
-						<div id="video-selector" class="selection clickable fl">视频</div>
-						<div class="cf"></div>	
-					</div>
-					<div class="cf"></div>						
-				</div>
-				<div class="cf"></div>		
-			</div>			
-			<div class="av audio">
-				<div class="item">
-					<div class="fixed sub fl">
-						<div class="fl">音频名称</div>
-						<div class="tip audio-name-tip fl">*</div>
-						<div class="cf"></div>
-					</div>
-					<div class="auto">
-						<input id="lyx-audio-name" class="input" type="text">
-					</div>
-					<div class="cf"></div>
-				</div>
-				<div class="item">
-					<div class="fixed sub fl">
-						<div class="fl">音频文件</div>
-						<div class="tip audio-file-tip fl">*</div>
-						<div class="cf"></div>
-					</div>
-					<div class="auto">
-						<div id="lyx-audio-container" class="container">
-							<div id="lyx-audio-select" class="btn clickable">
-								选择文件
-							</div>
-							<div class="process">
-								<div class="filename fl"></div>
-								<div class="percentage fr"></div>
-								<div class="bar fr"><div class="inner-bar"></div></div>
-								<div class="cf"></div>
-							</div>
-							<audio id="lyx-audio-attachment" class="attachment player" controls="controls"></audio>
-						</div>
-					</div>
-					<div class="cf"></div>
-				</div>
+			<div class="auto">
+				<input id="lyx-audio-name" class="input" type="text">
 			</div>
-			<div class="av video">
-				<div class="item">
-					<div class="fixed sub fl">
-						<div class="fl">视频名称</div>
-						<div class="tip video-name-tip fl">*</div>
-						<div class="cf"></div>
-					</div>
-					<div class="auto">
-						<input id="lyx-video-name" class="input" type="text">
-					</div>
-					<div class="cf"></div>
-				</div>
-				<div class="item file">
-					<div class="fixed sub fl">
-						<div class="fl">视频文件</div>
-						<div class="tip video-file-tip fl">*</div>
-						<div class="cf"></div>
-					</div>
-					<div class="auto">
-						<div id="lyx-video-container" class="container">
-							<div id="lyx-video-select" class="btn clickable">选择文件</div>
-							<div class="process">
-								<div class="filename fl"></div>
-								<div class="percentage fr"></div>
-								<div class="bar fr"><div class="inner-bar"></div></div>
-								<div class="cf"></div>
-							</div>
-							<video id="lyx-video-attachment" class="attachment player" controls="controls"></video>	
-						</div>								
-					</div>
-					<div class="cf"></div>
-				</div>
-				<div class="item code">
-					<div class="fixed sub fl">
-						<div class="fl">嵌入代码</div>
-						<div class="tip video-code-tip fl">*</div>
-						<div class="cf"></div>
-					</div>
-					<div class="auto">
-						<input id="lyx-video-code" class="input" type="text">
-					</div>
-					<div class="cf"></div>					
-				</div>			
-			</div>
-			<div class="item">
-				<div class="fixed fl">
-					<div class="fl">正文</div>
-					<div class="tip main-content-tip fl">*</div>
-					<div class="cf"></div>
-				</div>
-				<div class="auto">
-					<textarea id="lyx-simditor"></textarea>
-				</div>
-				<div class="cf"></div>		
-			</div>
-			<div class="item">
-				<div id="lyx-publish" class="btn publish clickable">发布</div>
-			</div>	
+			<div class="cf"></div>
 		</div>
-		<div class="lyx-layer">
-			<div class="lyx-loading">正在上传中, 请稍后......</div>
+		<div class="item">
+			<div class="fixed sub fl">
+				<div class="fl">音频文件</div>
+				<div class="tip audio-file-tip fl">*</div>
+				<div class="cf"></div>
+			</div>
+			<div class="auto">
+				<div id="lyx-audio-container" class="container">
+					<div id="lyx-audio-select" class="btn clickable">
+						选择文件
+					</div>
+					<div class="process">
+						<div class="filename fl"></div>
+						<div class="percentage fr"></div>
+						<div class="bar fr"><div class="inner-bar"></div></div>
+						<div class="cf"></div>
+					</div>
+					<audio id="lyx-audio-attachment" class="attachment player" controls="controls"></audio>
+				</div>
+			</div>
+			<div class="cf"></div>
 		</div>
-
-		<script src="lib/jquery/jquery.min.js"></script>
-        <script src="lib/simditor/scripts/module.js"></script>
-        <script src="lib/simditor/scripts/uploader.js"></script>
-        <script src="lib/simditor/scripts/hotkeys.js"></script>
-        <script src="lib/simditor/scripts/simditor.js"></script>
-        <script src="lib/plupload/plupload.full.min.js"></script>
-        <script src="lib/md5/md5.js"></script>
-        <script src="src/js/publish.js"></script>		
-	</body>
-</html>
+	</div>
+	<div class="av video">
+		<div class="item">
+			<div class="fixed sub fl">
+				<div class="fl">视频名称</div>
+				<div class="tip video-name-tip fl">*</div>
+				<div class="cf"></div>
+			</div>
+			<div class="auto">
+				<input id="lyx-video-name" class="input" type="text">
+			</div>
+			<div class="cf"></div>
+		</div>
+		<div class="item file">
+			<div class="fixed sub fl">
+				<div class="fl">视频文件</div>
+				<div class="tip video-file-tip fl">*</div>
+				<div class="cf"></div>
+			</div>
+			<div class="auto">
+				<div id="lyx-video-container" class="container">
+					<div id="lyx-video-select" class="btn clickable">选择文件</div>
+					<div class="process">
+						<div class="filename fl"></div>
+						<div class="percentage fr"></div>
+						<div class="bar fr"><div class="inner-bar"></div></div>
+						<div class="cf"></div>
+					</div>
+					<video id="lyx-video-attachment" class="attachment player" controls="controls"></video>	
+				</div>								
+			</div>
+			<div class="cf"></div>
+		</div>
+		<div class="item code">
+			<div class="fixed sub fl">
+				<div class="fl">嵌入代码</div>
+				<div class="tip video-code-tip fl">*</div>
+				<div class="cf"></div>
+			</div>
+			<div class="auto">
+				<input id="lyx-video-code" class="input" type="text">
+			</div>
+			<div class="cf"></div>					
+		</div>			
+	</div>
+	<div class="item">
+		<div class="fixed fl">
+			<div class="fl">正文</div>
+			<div class="tip main-content-tip fl">*</div>
+			<div class="cf"></div>
+		</div>
+		<div class="auto">
+			<textarea id="lyx-simditor"></textarea>
+		</div>
+		<div class="cf"></div>		
+	</div>
+	<div class="item">
+		<div id="lyx-publish" class="btn publish clickable">发布</div>
+	</div>	
+</div>
+<div class="lyx-layer">
+	<div class="lyx-loading">正在上传中, 请稍后......</div>
+</div>
