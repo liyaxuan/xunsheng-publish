@@ -1,5 +1,9 @@
 /*
-	lyxInit接受参数config用于初始化整个发布面板
+	lyxLoad接受参数root, config用于初始化整个发布面板
+
+	root是插入html的父元素, 是原生DOM元素
+	config用于初始化整个发布面板
+
 	config = {
 		offset: simditor的offset
 		method: 新建则值为"post", 编辑则值为为"put",
@@ -12,6 +16,7 @@
 */
 
 function lyxLoad(root, config) {
+	var HOST = 'http://dev.admin.xunsheng90.com/publish/v2/';
 	var xhr = new XMLHttpRequest();
 	xhr.onload = function () {
 		root.innerHTML = xhr.responseText;
@@ -19,7 +24,7 @@ function lyxLoad(root, config) {
 		['lib/simditor/styles/simditor.css', 'src/css/publish.css'].forEach(function (item) {
 			var link = document.createElement('link');
 			link.setAttribute('rel', 'stylesheet');
-			link.setAttribute('href', item);
+			link.setAttribute('href', HOST + item);
 			document.querySelector('head').appendChild(link);
 		});
 
@@ -30,23 +35,13 @@ function lyxLoad(root, config) {
 
 		function loadScripts(scripts) {
 			if(scripts.length > 0) {
-				var src = scripts.shift();
+				var src = HOST + scripts.shift();
 				var script = document.createElement('script');
 				script.setAttribute('src', src);		
 				script.onload = function () {
 					console.log(src);
 					if(scripts.length == 0) {
-						var c = config || {
-							offset: 0,
-							method: "post",
-							succ: function () {
-								alert("上传好了");
-							},
-							fail: function () {},
-							uid: "admin001",
-							token: lyxLogin({ uid: "admin001", pwd: "kkmnb" }).token
-						};
-						
+						var c = config;
 						lyxInit(c);						
 					}
 
@@ -58,8 +53,6 @@ function lyxLoad(root, config) {
 
 		loadScripts(scripts);
 	};
-	xhr.open('get', 'publish.html');
+	xhr.open('get', HOST + 'publish.html');
 	xhr.send();
 }
-
-lyxLoad(document.querySelector('body'));

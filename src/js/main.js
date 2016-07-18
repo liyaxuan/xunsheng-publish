@@ -1,13 +1,9 @@
-/* 所有全局范围内的变量和函数都有姓名前缀 */
-
 var lyxApiUrl = {
 	auth: "http://api.xunsheng90.com/user/login",
 	sign: "http://sign.xunsheng90.com/oss-sign",
 	file: "http://temp.xunsheng90.com",
 	entity: "http://api.xunsheng90.com/entity/uwork",
 };
-
-
 
 function lyxLogin(uidPwd) {
 	return lyxAjax({

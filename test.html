@@ -6,5 +6,33 @@
 	</head>
 	<body>
 		<script src="publish.js"></script>
+		<script>
+			/*
+				lyxLoad接受参数root, config用于初始化整个发布面板
+
+				root是插入html的父元素, 是原生DOM元素
+				config用于初始化整个发布面板
+
+				config = {
+					offset: simditor的offset
+					method: 新建则值为"post", 编辑则值为为"put",
+					id: 编辑的这篇作品的id, 如果是新建则没有该属性,
+					succ: 提交成功触发的回调函数,
+					fail: 提交失败触发的回调函数,
+					uid: "......",
+					token: "......"
+				}
+			*/
+			
+			/*不传入config将调用我的测试代码, 传入config即可正常运行*/
+			lyxLoad(document.querySelector('body'), {
+				offset: 0,
+				method: 'post',
+				succ: function () { alert('烦'); },
+				fail: function () { alert('滚'); },
+				uid: 'admin001',
+				token: 'admin001.Ci7YKw.Ke5nJiOHf4wkc8HcjTc8onnddeU'
+			});
+		</script>
 	</body>
 </html>
